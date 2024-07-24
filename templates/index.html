@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Tracker</title>
+    <script>
+        async function addStock() {
+            const symbol = document.getElementById('stockSymbol').value.toUpperCase();
+            const response = await fetch('/add_stock', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ symbol: symbol })
+            });
+            const data = await response.json();
+            if (response.ok) {
+                updateStockList(data.tracked_stocks);
+            } else {
+                alert(data.error);
+            }
+        }
+
+        async function removeStock(symbol) {
+            const response = await fetch('/remove_stock', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ symbol: symbol })
+            });
+            const data = await response.json();
+            if (response.ok) {
+                updateStockList(data.tracked_stocks);
+            } else {
+                alert(data.error);
+            }
+        }
+
+        async function updateStockList(stocks) {
+            const stockList = document.getElementById('trackedStocks');
+            stockList.innerHTML = '';
+            for (const [symbol, price] of Object.entries(stocks)) {
+                const li = document.createElement('li');
+                li.innerHTML = `${symbol}: $${price.toFixed(2)} <button onclick="removeStock('${symbol}')">Remove</button>`;
+                stockList.appendChild(li);
+            }
+        }
+
+        async function getTrackedStocks() {
+            const response = await fetch('/tracked_stocks');
+            const stocks = await response.json();
+            updateStockList(stocks);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            getTrackedStocks();
+        });
+    </script>
+</head>
+<body>
+    <h1>Stock Tracker</h1>
+    <form onsubmit="event.preventDefault(); addStock();">
+        <label for="stockSymbol">Enter Stock Symbol:</label>
+        <input type="text" id="stockSymbol" required>
+        <button type="submit">Add Stock</button>
+    </form>
+    <h2>Tracked Stocks:</h2>
+    <ul id="trackedStocks"></ul>
+</body>
+</html>
