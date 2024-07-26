@@ -7,34 +7,46 @@
     <script>
         async function addStock() {
             const symbol = document.getElementById('stockSymbol').value.toUpperCase();
-            const response = await fetch('/add_stock', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ symbol: symbol })
-            });
-            const data = await response.json();
-            if (response.ok) {
-                updateStockList(data.tracked_stocks);
-            } else {
-                alert(data.error);
+            console.log(`Adding stock: ${symbol}`);
+            try {
+                const response = await fetch('/add_stock', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ symbol: symbol })
+                });
+                const data = await response.json();
+                console.log('Response data:', data);
+                if (response.ok) {
+                    updateStockList(data.tracked_stocks);
+                } else {
+                    alert(data.error);
+                }
+            } catch (error) {
+                console.error('Error adding stock:', error);
             }
         }
 
         async function removeStock(symbol) {
-            const response = await fetch('/remove_stock', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ symbol: symbol })
-            });
-            const data = await response.json();
-            if (response.ok) {
-                updateStockList(data.tracked_stocks);
-            } else {
-                alert(data.error);
+            console.log(`Removing stock: ${symbol}`);
+            try {
+                const response = await fetch('/remove_stock', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ symbol: symbol })
+                });
+                const data = await response.json();
+                console.log('Response data:', data);
+                if (response.ok) {
+                    updateStockList(data.tracked_stocks);
+                } else {
+                    alert(data.error);
+                }
+            } catch (error) {
+                console.error('Error removing stock:', error);
             }
         }
 
-        async function updateStockList(stocks) {
+        function updateStockList(stocks) {
             const stockList = document.getElementById('trackedStocks');
             stockList.innerHTML = '';
             for (const [symbol, price] of Object.entries(stocks)) {
@@ -45,24 +57,134 @@
         }
 
         async function getTrackedStocks() {
-            const response = await fetch('/tracked_stocks');
-            const stocks = await response.json();
-            updateStockList(stocks);
+            console.log('Fetching tracked stocks...');
+            try {
+                const response = await fetch('/tracked_stocks');
+                const stocks = await response.json();
+                console.log('Tracked stocks:', stocks);
+                updateStockList(stocks);
+            } catch (error) {
+                console.error('Error fetching tracked stocks:', error);
+            }
         }
 
         document.addEventListener('DOMContentLoaded', function() {
             getTrackedStocks();
         });
     </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        .heading {
+            text-align: center;
+            margin-top: 50px;
+            font-size: 48px;
+            color: black;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 20px;
+            margin-top: 50px;
+        }
+
+        .box {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: 400px;
+        }
+
+        .form-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .form-box input[type="text"] {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-top: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        .form-box button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .form-box button:hover {
+            background-color: #45a049;
+        }
+
+        .tracked-box h2 {
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .tracked-box ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .tracked-box li {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .tracked-box li button {
+            padding: 5px 10px;
+            background-color: #e51717;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .tracked-box li button:hover {
+            background-color: #cc1414;
+        }
+    </style>
 </head>
 <body>
-    <h1>Stock Tracker</h1>
-    <form onsubmit="event.preventDefault(); addStock();">
-        <label for="stockSymbol">Enter Stock Symbol:</label>
-        <input type="text" id="stockSymbol" required>
-        <button type="submit">Add Stock</button>
-    </form>
-    <h2>Tracked Stocks:</h2>
-    <ul id="trackedStocks"></ul>
+    <h1 class="heading">Stock Tracker</h1>
+    <div class="container">
+        <div class="box form-box">
+            <form onsubmit="event.preventDefault(); addStock();">
+                <label for="stockSymbol">Enter Stock Symbol:</label>
+                <input type="text" id="stockSymbol" placeholder="Type a stock symbol here..." required>
+                <button type="submit">Add Stock</button>
+            </form>
+        </div>
+        <div class="box tracked-box">
+            <h2>Tracked Stocks</h2>
+            <ul id="trackedStocks"></ul>
+        </div>
+    </div>
 </body>
 </html>
